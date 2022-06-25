@@ -7,6 +7,10 @@ import com.smallcase.portfolio.models.Trade;
 
 import java.util.List;
 
+/**
+ * @author utsav
+ * This interface defines all services which portfolio platform will cater to
+ */
 public interface PortfolioService {
 
     /**

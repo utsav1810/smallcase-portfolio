@@ -6,37 +6,51 @@ import org.apache.commons.lang3.RandomStringUtils;
 import javax.persistence.*;
 import java.util.Date;
 
+/**
+ * @author utsav
+ * This POJO is a db model respresentation of postgres trade table
+ * It is used for all db operations and in memory operation on trades
+ */
 @Entity
 @Table(name = "trade")
 public class Trade {
 
+    /* Randomly generate Id for every trade transaction */
     @Id
     @Column(name = "id")
     private String id;
 
+
     @Column(name = "ticker")
     private String ticker;
 
+    /* Status of a trade - SUCCESS / REMOVED */
     @Column(name = "status")
     private String status;
 
+    /* Quantity on which order was placed in a trade */
     @Column(name = "qty")
     private int qty;
 
+    /* Price on which order was placed in a trade */
     @Column(name = "price")
     private double price;
 
+    /* Type of trade - BUY / SELL */
     @Column(name = "type")
     private String type;
 
+    /* time stamp on which trade was executed */
     @Column(name = "timestamp")
     @Temporal(TemporalType.TIMESTAMP)
     private Date timestamp;
 
+    /* previous quantity of stock in portfolio when trade order was received */
     @Column(name = "prev_qty")
     @JsonIgnore
     private int previousQty;
 
+    /* previous average buying price of stock in portfolio when trade order was received */
     @Column(name = "prev_avg_price")
     @JsonIgnore
     private double previousAvgPrice;

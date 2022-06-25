@@ -1,41 +1,36 @@
 package com.smallcase.portfolio.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+/**
+ * @author utsav
+ * This POJO is a db model respresentation of postgres stock table
+ * It is used for all db operations and in memory operation on stocks
+ */
 @Entity
 @Table(name = "stock")
 public class Stock {
 
+    /* Ticker symbol of a stock
+    * Every listed security has a unique ticker symbol,
+    * facilitating the vast array of trade orders that flow through the financial markets every day.
+    */
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id")
-    @JsonIgnore
-    private int id;
-
     @Column(name = "ticker")
     private String ticker;
 
+    /* Quantity of stock in a portfolio */
     @Column(name = "qty")
     private int qty;
 
+    /* Average buying price of stock */
     @Column(name = "average_price")
     private double averagePrice;
 
     public Stock() {
-    }
-
-    public Stock(int id, String ticker, double averagePrice, int qty) {
-        this.id = id;
-        this.ticker = ticker;
-        this.qty = qty;
-        this.averagePrice = averagePrice;
     }
 
     public Stock(String ticker, double averagePrice, int qty) {
@@ -47,19 +42,10 @@ public class Stock {
     @Override
     public String toString() {
         return "Portfolio{" +
-                "id=" + id +
-                ", ticket='" + ticker + '\'' +
+                "ticket='" + ticker + '\'' +
                 ", qty=" + qty +
                 ", averagePrice=" + averagePrice +
                 '}';
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String getTicker() {

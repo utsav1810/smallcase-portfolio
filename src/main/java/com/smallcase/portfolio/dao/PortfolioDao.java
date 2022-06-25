@@ -44,7 +44,7 @@ public class PortfolioDao implements Dao<Stock, Integer> {
                     double averagePrice = resultSet.getDouble("average_price");
                     int qty = resultSet.getInt("qty");
 
-                    Stock customer = new Stock(id, ticker, averagePrice, qty);
+                    Stock customer = new Stock(ticker, averagePrice, qty);
 
                     customers.add(customer);
 

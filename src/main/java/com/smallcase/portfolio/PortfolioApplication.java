@@ -3,6 +3,11 @@ package com.smallcase.portfolio;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+/**
+ * @author utsav
+ * Defining spring application
+ * Entry point of code
+ */
 @SpringBootApplication
 public class PortfolioApplication {
 

@@ -2,6 +2,11 @@ package com.smallcase.portfolio.exception;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * @author utsav
+ * This class is used to define custom exception for our application
+ * It helps return output - status code and message to user
+ */
 public class PortfolioException extends RuntimeException {
 
     private HttpStatus httpStatus;
