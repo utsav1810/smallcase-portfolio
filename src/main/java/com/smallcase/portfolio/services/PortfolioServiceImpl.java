@@ -137,7 +137,7 @@ public class PortfolioServiceImpl implements PortfolioService{
         }
         return updateStock(stock);
     }
-    
+
     /**
      * This method will update a stock entry in the database
      *

@@ -1,0 +1,1 @@
+web: java -war target/portfolio-v1.war
