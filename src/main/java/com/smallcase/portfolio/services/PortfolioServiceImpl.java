@@ -4,7 +4,7 @@ import com.smallcase.portfolio.dao.StockRepository;
 import com.smallcase.portfolio.dao.TradeRepository;
 import com.smallcase.portfolio.helpers.Constants;
 import com.smallcase.portfolio.exception.PortfolioException;
-import com.smallcase.portfolio.helpers.Helper;
+import com.smallcase.portfolio.helpers.Utility;
 import com.smallcase.portfolio.models.ReturnResponse;
 import com.smallcase.portfolio.models.Stock;
 import com.smallcase.portfolio.models.StockTradeResponse;
@@ -57,7 +57,7 @@ public class PortfolioServiceImpl implements PortfolioService{
         if(stock == null){
             if (Constants.SELL.equals(trade.getType()))
                 throw new PortfolioException(HttpStatus.BAD_REQUEST, "Buy some shares first.");
-            isStockOperationSuccessful = createStock(new Stock(trade.getTicker(), Helper.round(trade.getPrice(), 2), trade.getQty()));
+            isStockOperationSuccessful = createStock(new Stock(trade.getTicker(), Utility.round(trade.getPrice(), 2), trade.getQty()));
         } else {
             stockAveragePrice = stock.getAveragePrice();
             stockQty = stock.getQty();
@@ -105,8 +105,8 @@ public class PortfolioServiceImpl implements PortfolioService{
         for(Stock stock: stocks){
             double buyingPrice = stock.getAveragePrice();
             int quantity = stock.getQty();
-            double returnAmount = Helper.round((Constants.CURRENT_PRICE - buyingPrice) * quantity, 2);
-            double returnPercentage = Helper.round((returnAmount * 100)/(buyingPrice * quantity) , 2);
+            double returnAmount = Utility.round((Constants.CURRENT_PRICE - buyingPrice) * quantity, 2);
+            double returnPercentage = Utility.round((returnAmount * 100)/(buyingPrice * quantity) , 2);
             returnResponse.setReturnAmount(returnAmount);
             returnResponse.setReturnPercentage(returnPercentage);
         }
@@ -131,7 +131,7 @@ public class PortfolioServiceImpl implements PortfolioService{
 
         if (Constants.BUY.equals(trade.getType())) {
             int totalQty = tradeQty + stockQty;
-            double totalBuyAvgPrice = Helper.round(((tradeQty * tradeAveragePrice) + (stockAveragePrice * stockQty)) / totalQty, 2);
+            double totalBuyAvgPrice = Utility.round(((tradeQty * tradeAveragePrice) + (stockAveragePrice * stockQty)) / totalQty, 2);
             stock.setAveragePrice(totalBuyAvgPrice);
             stock.setQty(totalQty);
         } else if (Constants.SELL.equals(trade.getType())) {
