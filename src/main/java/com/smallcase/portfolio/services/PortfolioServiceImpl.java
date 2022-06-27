@@ -5,10 +5,7 @@ import com.smallcase.portfolio.dao.TradeRepository;
 import com.smallcase.portfolio.helpers.Constants;
 import com.smallcase.portfolio.exception.PortfolioException;
 import com.smallcase.portfolio.helpers.Utility;
-import com.smallcase.portfolio.models.ReturnResponse;
-import com.smallcase.portfolio.models.Stock;
-import com.smallcase.portfolio.models.StockTradeResponse;
-import com.smallcase.portfolio.models.Trade;
+import com.smallcase.portfolio.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -45,29 +42,44 @@ public class PortfolioServiceImpl implements PortfolioService{
     @Override
     public Trade executeTrade(Trade trade) {
 
-        validateTrade(trade);
+        //Pre validation of a trade input
+        prevalidateTrade(trade);
+
+        //Create trade entry in DB
+        trade.setStatus(Constants.STARTED);
+        trade.setTimestamp(new Date());
+        trade.generateAutoId();
+        Trade tradeStarted = tradeRepository.save(trade);
+
+        //Validate trade object and check for corner conditions
+        TradeValidation tradeValidation = validateTrade(trade);
+        if(!tradeValidation.isValid())
+            return markTradeFailed(tradeStarted, tradeValidation.getErrorMessage());
 
         double stockAveragePrice = 0d;
         int stockQty = 0;
+        boolean isStockOperationSuccessful;
 
         Stock stock = fetchStockInfo(trade.getTicker());
 
-        boolean isStockOperationSuccessful;
-
+        //If user wants to sell shares but does not own the stock itself
         if(stock == null){
             if (Constants.SELL.equals(trade.getType()))
-                throw new PortfolioException(HttpStatus.BAD_REQUEST, "Buy some shares first.");
+                return markTradeFailed(tradeStarted, "Buy some shares first");
             isStockOperationSuccessful = createStock(new Stock(trade.getTicker(), Utility.round(trade.getPrice(), 2), trade.getQty()));
         } else {
             stockAveragePrice = stock.getAveragePrice();
             stockQty = stock.getQty();
 
+            //If user wants to sell more shares than they own
             if (Constants.SELL.equals(trade.getType()) && trade.getQty() > stockQty)
-                throw new PortfolioException(HttpStatus.BAD_REQUEST, "Not enough shares to sell. You can sell only " + stock.getQty() + " shares.");
+                return markTradeFailed(tradeStarted, "Not enough shares to sell. You can sell only " + stock.getQty() + " shares");
 
-            else if (Constants.SELL.equals(trade.getType()) && trade.getQty() == stockQty)
+            //If user wants to sell all shares
+            if (Constants.SELL.equals(trade.getType()) && trade.getQty() == stockQty)
                 isStockOperationSuccessful = deleteStock(stock.getTicker());
 
+            //If user wants to sell some shares or buy some shares
             else
                 isStockOperationSuccessful = updateStockDetails(trade, stock);
         }
@@ -78,9 +90,21 @@ public class PortfolioServiceImpl implements PortfolioService{
         trade.setPreviousAvgPrice(stockAveragePrice);
         trade.setPreviousQty(stockQty);
         trade.setStatus(Constants.SUCCESS);
-        trade.setTimestamp(new Date());
-        trade.generateAutoId();
 
+        return tradeRepository.save(trade);
+    }
+
+    /**
+     * This trade will be marked as FAILED in the DB with given error message
+     *
+     * @param trade             -       Existing trade object
+     * @param errorMessage      -       Error message to store
+     * @return Trade
+     */
+    private Trade markTradeFailed(Trade trade, String errorMessage) {
+        System.out.println("Trade failed :" + trade + "\nReason: " + errorMessage);
+        trade.setStatus(Constants.FAILED);
+        trade.setErrorMessage(errorMessage);
         return tradeRepository.save(trade);
     }
 
@@ -206,22 +230,37 @@ public class PortfolioServiceImpl implements PortfolioService{
 
     /**
      * This method will validate a trade
-     * It will consider different conditions based on ticker symbol, price, qty and type of trade
+     * It will consider different conditions based on price and qty
      *
-     * @param trade     -   trade input to validate
+     * @param trade                 -   trade input to validate
+     * @return TradeValidation      -   TradeValidation object
      */
-    private void validateTrade(Trade trade){
+    private TradeValidation validateTrade(Trade trade){
+        TradeValidation tradeValidation = new TradeValidation();
+        tradeValidation.setValid(true);
+
+        if (trade.getQty() <= 0)
+            tradeValidation.setErrorMessage("Quantity has to be greater than 0");
+
+        else if (trade.getPrice() <= 0)
+            tradeValidation.setErrorMessage("Price has to be greater than 0");
+
+        return tradeValidation;
+    }
+
+    /**
+     * This method will validate a trade before making any entry
+     * It will consider different conditions based on ticker symbol and type of trade
+     *
+     * @param trade                 -   trade input to validate
+     */
+    private void prevalidateTrade(Trade trade){
         if(!isTickerValid(trade.getTicker()))
             throw new PortfolioException(HttpStatus.BAD_REQUEST, "This company is not listed. Valid listed companies are: " + alValidTicker);
 
-        if(!Constants.SELL.equals(trade.getType()) && !Constants.BUY.equals(trade.getType()))
+        else if(!Constants.SELL.equals(trade.getType()) && !Constants.BUY.equals(trade.getType()))
             throw new PortfolioException(HttpStatus.BAD_REQUEST, "Type has to be BUY or SELL");
 
-        if (trade.getQty() <= 0)
-            throw new PortfolioException(HttpStatus.BAD_REQUEST, "Quantity has to be greater than 0");
-
-        if (trade.getPrice() <= 0)
-            throw new PortfolioException(HttpStatus.BAD_REQUEST, "Price has to be greater than 0");
     }
 }
 

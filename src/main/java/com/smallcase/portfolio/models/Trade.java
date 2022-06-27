@@ -24,7 +24,11 @@ public class Trade {
     @Column(name = "ticker")
     private String ticker;
 
-    /* Status of a trade - SUCCESS / REMOVED */
+    /* Error message in case of trade failure */
+    @Column(name = "error_message")
+    private String errorMessage;
+
+    /* Status of a trade - STARTED / FAILED / SUCCESS / REMOVED */
     @Column(name = "status")
     private String status;
 
@@ -141,15 +145,24 @@ public class Trade {
         this.previousAvgPrice = previousAvgPrice;
     }
 
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
+
     @Override
     public String toString() {
         return "Trade{" +
-                "id=" + id +
+                "id='" + id + '\'' +
                 ", ticker='" + ticker + '\'' +
-                ", status=" + status +
+                ", errorMessage='" + errorMessage + '\'' +
+                ", status='" + status + '\'' +
                 ", qty=" + qty +
                 ", price=" + price +
-                ", type=" + type +
+                ", type='" + type + '\'' +
                 ", timestamp=" + timestamp +
                 ", previousQty=" + previousQty +
                 ", previousAvgPrice=" + previousAvgPrice +

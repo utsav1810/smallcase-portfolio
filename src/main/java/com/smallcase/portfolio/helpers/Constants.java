@@ -12,6 +12,8 @@ public class Constants {
 
     //Trade status constants
     public static final String SUCCESS = "SUCCESS";
+    public static final String STARTED = "STARTED";
+    public static final String FAILED = "FAILED";
     public static final String REMOVED = "REMOVED";
 
     //Ticker Symbol constants
