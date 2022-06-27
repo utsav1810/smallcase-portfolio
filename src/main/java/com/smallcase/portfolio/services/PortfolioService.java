@@ -52,4 +52,10 @@ public interface PortfolioService {
      * @return ReturnResponse
      */
     ReturnResponse fetchReturns();
+
+    /**
+     * This method will delete the last executed trade - FAILED/SUCCESS status
+     * @param ticker
+     */
+    Trade deleteTrade(String ticker);
 }

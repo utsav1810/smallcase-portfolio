@@ -1,7 +1,5 @@
 package com.smallcase.portfolio.controllers;
 
-import com.smallcase.portfolio.models.Stock;
-import com.smallcase.portfolio.models.StockTradeResponse;
 import com.smallcase.portfolio.models.Trade;
 import com.smallcase.portfolio.services.PortfolioService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,5 +21,9 @@ public class TradeController {
         return portfolioService.executeTrade(trade);
     }
 
+    @DeleteMapping
+    public Trade deleteTrade(@RequestParam String ticker) {
+        return portfolioService.deleteTrade(ticker);
+    }
 }
 

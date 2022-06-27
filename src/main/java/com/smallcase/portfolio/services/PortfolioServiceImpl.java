@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -142,6 +143,16 @@ public class PortfolioServiceImpl implements PortfolioService{
         return returnResponse;
     }
 
+    @Override
+    public Trade deleteTrade(String ticker) {
+        Trade lastTradeForTicker = tradeRepository.findTopByTickerOrderByTimestampDesc(ticker);
+        String status = lastTradeForTicker.getStatus();
+        tradeRepository.delete(lastTradeForTicker);
+        if(!Constants.FAILED.equals(status))
+            rollBackTrade(lastTradeForTicker);
+        return lastTradeForTicker;
+    }
+
     /**
      * This method will update stock details based on a given trade
      * It will process 2 types of trade - BUY/SELL
@@ -197,7 +208,7 @@ public class PortfolioServiceImpl implements PortfolioService{
             stockRepository.deleteByTicker(ticker);
             return true;
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
@@ -261,6 +272,28 @@ public class PortfolioServiceImpl implements PortfolioService{
         else if(!Constants.SELL.equals(trade.getType()) && !Constants.BUY.equals(trade.getType()))
             throw new PortfolioException(HttpStatus.BAD_REQUEST, "Type has to be BUY or SELL");
 
+    }
+
+    /**
+     * This method will perform rollback operation for an executed trade
+     * @param trade     -   Trade entry to rollback
+     */
+    private void rollBackTrade(Trade trade){
+
+        int previousQty = trade.getPreviousQty();
+        double previousAvgPrice = trade.getPreviousAvgPrice();
+        Stock stock = new Stock(trade.getTicker(), previousAvgPrice, previousQty);
+
+        if(Utility.isTradeTypeSell(trade))
+            stockRepository.save(stock);
+        else{
+            //If user had some shares of this stock before last operation, update the qty and avgPrice to old values
+            if(previousQty != 0)
+                stockRepository.save(stock);
+            //If user had 0 shares of this stock before last operation, remove the entry from stock db
+            else
+                stockRepository.delete(stock);
+        }
     }
 }
 
