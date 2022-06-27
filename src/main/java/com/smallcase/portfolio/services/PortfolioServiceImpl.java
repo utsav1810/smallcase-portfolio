@@ -102,14 +102,19 @@ public class PortfolioServiceImpl implements PortfolioService{
     public ReturnResponse fetchReturns() {
         ReturnResponse returnResponse = new ReturnResponse();
         List<Stock> stocks = fetchPortfolio();
+        double returnAmount = 0d;
+        double returnPercentage = 0d;
+        double totalBuyPrice = 0d;
         for(Stock stock: stocks){
             double buyingPrice = stock.getAveragePrice();
             int quantity = stock.getQty();
-            double returnAmount = Utility.round((Constants.CURRENT_PRICE - buyingPrice) * quantity, 2);
-            double returnPercentage = Utility.round((returnAmount * 100)/(buyingPrice * quantity) , 2);
-            returnResponse.setReturnAmount(returnAmount);
-            returnResponse.setReturnPercentage(returnPercentage);
+            totalBuyPrice += buyingPrice*quantity;
+            returnAmount += Utility.round((Constants.CURRENT_PRICE - buyingPrice) * quantity, 2);
         }
+        if(totalBuyPrice != 0)
+            returnPercentage = Utility.round((returnAmount * 100)/(totalBuyPrice) , 2);
+        returnResponse.setReturnAmount(returnAmount);
+        returnResponse.setReturnPercentage(returnPercentage);
         return returnResponse;
     }
 
