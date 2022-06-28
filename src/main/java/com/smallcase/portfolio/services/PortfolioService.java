@@ -24,7 +24,7 @@ public interface PortfolioService {
     /**
      * This method will fetch information about a particular stock in portfolio
      *
-     * @param ticker    -   ticker sybmol of stock
+     * @param ticker    -   ticker symbol of stock
      * @return Stock
      */
     Stock fetchStockInfo(String ticker);
@@ -55,7 +55,15 @@ public interface PortfolioService {
 
     /**
      * This method will delete the last executed trade - FAILED/SUCCESS status
-     * @param ticker
+     * @param ticker        -   ticker symbol of stock
+     * @return Trade
      */
     Trade deleteTrade(String ticker);
+
+    /**
+     * This method will update the last executed trade - FAILED/SUCCESS status
+     * @param trade     -   trade object containing details about the trade to be updated
+     * @return Trade
+     */
+    Trade updateTrade(Trade trade);
 }

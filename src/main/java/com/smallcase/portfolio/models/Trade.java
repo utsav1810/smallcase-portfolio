@@ -1,9 +1,11 @@
 package com.smallcase.portfolio.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.smallcase.portfolio.helpers.Constants;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import javax.persistence.*;
+import java.util.ConcurrentModificationException;
 import java.util.Date;
 
 /**
@@ -151,6 +153,7 @@ public class Trade {
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
+        this.setStatus(Constants.FAILED);
     }
 
     @Override

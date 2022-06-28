@@ -25,5 +25,10 @@ public class TradeController {
     public Trade deleteTrade(@RequestParam String ticker) {
         return portfolioService.deleteTrade(ticker);
     }
+
+    @PutMapping
+    public Trade updateTrade(@RequestBody Trade trade) {
+        return portfolioService.updateTrade(trade);
+    }
 }
 
