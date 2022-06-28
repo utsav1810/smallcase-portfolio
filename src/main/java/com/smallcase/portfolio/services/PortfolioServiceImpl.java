@@ -16,6 +16,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * This is an implementation class of portfolio service.
+ * It has all necessary services implemented end-to-end and exposed for other services/controllers to consume
+ */
 @Component
 public class PortfolioServiceImpl implements PortfolioService{
 
@@ -50,21 +54,12 @@ public class PortfolioServiceImpl implements PortfolioService{
         trade.generateAutoId();
         trade = tradeRepository.save(trade);
 
-        //Validate trade object and check for corner conditions
-        TradeValidation tradeValidation = validateTrade(trade);
-        if(!tradeValidation.isValid())
-            markTradeFailed(trade, tradeValidation.getErrorMessage());
-
         trade.setPreviousQty(0);
         trade.setPreviousAvgPrice(0d);
 
-        //if stock update operation was not successful, mark the trade as failed
-        if(!updateStockRecordForTrade(trade)) {
-            trade.setStatus(Constants.FAILED);
-            trade.setErrorMessage("Error occurred while executing your trade");
-        } else {
-            trade.setStatus(Constants.SUCCESS);
-        }
+        updateStockRecordForTrade(trade);
+        trade.setStatus(Constants.SUCCESS);
+
         return tradeRepository.save(trade);
     }
 
@@ -72,9 +67,8 @@ public class PortfolioServiceImpl implements PortfolioService{
      * This method will update stock table record for a trade
      *
      * @param trade     -   trade object with details
-     * @return boolean  -   operation status ture/false
      */
-    private boolean updateStockRecordForTrade(Trade trade) {
+    private void updateStockRecordForTrade(Trade trade) {
         Stock stock = fetchStockInfo(trade.getTicker());
 
         boolean isStockOperationSuccessful;
@@ -83,7 +77,7 @@ public class PortfolioServiceImpl implements PortfolioService{
         if(stock == null){
             if (Utility.isTradeTypeSell(trade))
                 markTradeFailed(trade, "Buy some shares first");
-            isStockOperationSuccessful = createStock(new Stock(trade.getTicker(), Utility.round(trade.getPrice(), 2), trade.getQty()));
+            stockRepository.save(new Stock(trade.getTicker(), Utility.round(trade.getPrice(), 2), trade.getQty()));
         } else {
             int stockQty = stock.getQty();
             trade.setPreviousQty(stockQty);
@@ -95,13 +89,12 @@ public class PortfolioServiceImpl implements PortfolioService{
 
             //If user wants to sell all shares
             if (Utility.isTradeTypeSell(trade) && trade.getQty() == stockQty)
-                isStockOperationSuccessful = deleteStock(stock.getTicker());
+                stockRepository.delete(stock);
 
             //If user wants to sell some shares or buy some shares
             else
-                isStockOperationSuccessful = updateStockDetails(trade, stock);
+                updateStockDetails(trade, stock);
         }
-        return isStockOperationSuccessful;
     }
 
     /**
@@ -176,9 +169,6 @@ public class PortfolioServiceImpl implements PortfolioService{
 
         //Trade validation - we will proceed for update operation only if basic trade validation is successful
         preValidateTrade(trade);
-        TradeValidation tradeValidation = validateTrade(trade);
-        if(!tradeValidation.isValid())
-            throw new PortfolioException(HttpStatus.BAD_REQUEST, tradeValidation.getErrorMessage());
 
         //get last executed trade (FAILED/SUCCESS) for given ticker
         String ticker = trade.getTicker();
@@ -197,11 +187,8 @@ public class PortfolioServiceImpl implements PortfolioService{
         trade.setPreviousQty(lastTradeForTicker.getPreviousQty());
         trade.setTimestamp(new Date());
 
-        //if stock update operation was not successful, throw error to rollback previous changes on DB
-        if(!updateStockRecordForTrade(trade))
-            throw new PortfolioException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error occurred while updating trade");
-        else
-            trade.setStatus(Constants.SUCCESS);
+        updateStockRecordForTrade(trade);
+        trade.setStatus(Constants.SUCCESS);
 
         return tradeRepository.save(trade);
     }
@@ -213,9 +200,8 @@ public class PortfolioServiceImpl implements PortfolioService{
      *
      * @param trade     -   Trade to be executed
      * @param stock     -   Current stock object in portfolio
-     * @return boolean  -   operation success = true/false
      */
-    private boolean updateStockDetails(Trade trade, Stock stock){
+    private void updateStockDetails(Trade trade, Stock stock){
         double stockAveragePrice = stock.getAveragePrice();
         int stockQty = stock.getQty();
 
@@ -231,80 +217,12 @@ public class PortfolioServiceImpl implements PortfolioService{
             int totalQty = stockQty - tradeQty;
             stock.setQty(totalQty);
         }
-        return updateStock(stock);
-    }
-
-    /**
-     * This method will update a stock entry in the database
-     *
-     * @param stock     -   Stock object to update in db
-     * @return boolean  -   operation success = true/false
-     */
-    public boolean updateStock(Stock stock) {
-        try {
-            stockRepository.save(stock);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    /**
-     * This method will delete a stock entry from the database
-     *
-     * @param ticker        -   ticker symbol for which entry needs to be deleted
-     * @return boolean      -   operation success = true/false
-     */
-    public Boolean deleteStock(String ticker) {
-        try {
-            stockRepository.deleteByTicker(ticker);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    /**
-     * This method will create a stock entry in the database
-     *
-     * @param stock     -   Stock object to create in db
-     * @return boolean  -   operation success = true/false
-     */
-    public boolean createStock(Stock stock) {
-        try {
-            stockRepository.save(stock);
-        } catch (Exception e){
-            e.printStackTrace();
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * This method will validate a trade
-     * It will consider different conditions based on price and qty
-     *
-     * @param trade                 -   trade input to validate
-     * @return TradeValidation      -   TradeValidation object
-     */
-    private TradeValidation validateTrade(Trade trade){
-        TradeValidation tradeValidation = new TradeValidation();
-        tradeValidation.setValid(true);
-
-        if (trade.getQty() <= 0)
-            tradeValidation.setErrorMessage("Quantity has to be greater than 0");
-
-        else if (trade.getPrice() <= 0)
-            tradeValidation.setErrorMessage("Price has to be greater than 0");
-
-        return tradeValidation;
+        stockRepository.save(stock);
     }
 
     /**
      * This method will validate a trade before making any entry
-     * It will consider different conditions based on ticker symbol and type of trade
+     * It will consider different conditions based on ticker symbol, type of trade, qty, price, etc
      *
      * @param trade                 -   trade input to validate
      */
@@ -314,6 +232,12 @@ public class PortfolioServiceImpl implements PortfolioService{
 
         else if(!Utility.isTradeTypeBuy(trade) && !Utility.isTradeTypeSell(trade))
             throw new PortfolioException(HttpStatus.BAD_REQUEST, "Type has to be BUY or SELL");
+
+        else if (trade.getQty() <= 0)
+            throw new PortfolioException(HttpStatus.BAD_REQUEST, "Quantity has to be greater than 0");
+
+        else if (trade.getPrice() <= 0)
+            throw new PortfolioException(HttpStatus.BAD_REQUEST, "Price has to be greater than 0");
 
     }
 
@@ -339,4 +263,3 @@ public class PortfolioServiceImpl implements PortfolioService{
         }
     }
 }
-
