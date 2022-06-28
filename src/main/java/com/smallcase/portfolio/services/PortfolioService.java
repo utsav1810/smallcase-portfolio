@@ -1,9 +1,6 @@
 package com.smallcase.portfolio.services;
 
-import com.smallcase.portfolio.models.ReturnResponse;
-import com.smallcase.portfolio.models.Stock;
-import com.smallcase.portfolio.models.StockTradeResponse;
-import com.smallcase.portfolio.models.Trade;
+import com.smallcase.portfolio.models.*;
 
 import java.util.List;
 
@@ -43,7 +40,7 @@ public interface PortfolioService {
      *
      * @return List<StockTradeResponse>
      */
-    List<StockTradeResponse> fetchAllTrades();
+    StockTradeResponseList fetchAllTrades();
 
     /**
      * This method will calculate the current cumulative returns of a portfolio

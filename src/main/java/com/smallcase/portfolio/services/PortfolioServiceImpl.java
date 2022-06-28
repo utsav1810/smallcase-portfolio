@@ -59,6 +59,7 @@ public class PortfolioServiceImpl implements PortfolioService{
 
         updateStockRecordForTrade(trade);
         trade.setStatus(Constants.SUCCESS);
+        trade.setErrorMessage(null);
 
         return tradeRepository.save(trade);
     }
@@ -110,17 +111,19 @@ public class PortfolioServiceImpl implements PortfolioService{
     }
 
     @Override
-    public List<StockTradeResponse> fetchAllTrades() {
+    public StockTradeResponseList fetchAllTrades() {
 
         List<Stock> stocks = stockRepository.findAll(Sort.by(Sort.Direction.ASC, "ticker"));
+        StockTradeResponseList responseList = new StockTradeResponseList();
         List<StockTradeResponse> response = new ArrayList<>();
+        responseList.setStockTradeResponse(response);
 
         for(Stock stock: stocks){
             List<Trade> trade = tradeRepository.findByTicker(stock.getTicker(), Sort.by(Sort.Direction.DESC, "timestamp"));
             response.add(new StockTradeResponse(stock, trade));
         }
 
-        return response;
+        return responseList;
     }
 
     @Override
@@ -187,6 +190,7 @@ public class PortfolioServiceImpl implements PortfolioService{
 
         updateStockRecordForTrade(trade);
         trade.setStatus(Constants.SUCCESS);
+        trade.setErrorMessage(null);
 
         return tradeRepository.save(trade);
     }

@@ -1,10 +1,13 @@
 package com.smallcase.portfolio.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.smallcase.portfolio.helpers.Constants;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.util.ConcurrentModificationException;
 import java.util.Date;
 
@@ -19,10 +22,11 @@ public class Trade {
 
     /* Randomly generate Id for every trade transaction */
     @Id
+    @JsonIgnore
     @Column(name = "id")
     private String id;
 
-
+    @NotBlank
     @Column(name = "ticker")
     private String ticker;
 
@@ -35,19 +39,26 @@ public class Trade {
     private String status;
 
     /* Quantity on which order was placed in a trade */
+    @NotBlank
+    @Size(min = 0)
     @Column(name = "qty")
+    @JsonProperty("quantity")
     private int qty;
 
     /* Price on which order was placed in a trade */
+    @NotBlank
     @Column(name = "price")
+    @Size(min = 0)
     private double price;
 
     /* Type of trade - BUY / SELL */
+    @NotBlank
     @Column(name = "type")
     private String type;
 
     /* time stamp on which trade was executed */
     @Column(name = "timestamp")
+    @JsonIgnore
     @Temporal(TemporalType.TIMESTAMP)
     private Date timestamp;
 

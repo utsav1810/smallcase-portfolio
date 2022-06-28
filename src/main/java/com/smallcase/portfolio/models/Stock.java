@@ -1,5 +1,7 @@
 package com.smallcase.portfolio.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -24,10 +26,12 @@ public class Stock {
 
     /* Quantity of stock in a portfolio */
     @Column(name = "qty")
+    @JsonProperty("quantity")
     private int qty;
 
     /* Average buying price of stock */
     @Column(name = "average_price")
+    @JsonProperty("averageBuyPrice")
     private double averagePrice;
 
     public Stock() {
