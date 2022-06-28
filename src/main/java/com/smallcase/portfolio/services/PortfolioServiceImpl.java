@@ -71,8 +71,6 @@ public class PortfolioServiceImpl implements PortfolioService{
     private void updateStockRecordForTrade(Trade trade) {
         Stock stock = fetchStockInfo(trade.getTicker());
 
-        boolean isStockOperationSuccessful;
-
         //If user wants to sell shares but does not own the stock, throw error
         if(stock == null){
             if (Utility.isTradeTypeSell(trade))
