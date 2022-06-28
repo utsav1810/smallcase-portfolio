@@ -1,6 +1,5 @@
 package com.smallcase.portfolio.controllers;
 
-import com.smallcase.portfolio.models.StockTradeResponse;
 import com.smallcase.portfolio.models.StockTradeResponseList;
 import com.smallcase.portfolio.models.Trade;
 import com.smallcase.portfolio.services.PortfolioService;
@@ -13,10 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
-@RequestMapping("/trades")
+@RequestMapping("/trade")
 public class TradeController {
 
     @Autowired
@@ -60,7 +57,7 @@ public class TradeController {
             @ApiResponse(responseCode = "200", description = "Trade udpated successfully",
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = StockTradeResponseList.class))})})
-    @GetMapping
+    @GetMapping("/list")
     public StockTradeResponseList fetchAllDetails() {
         return portfolioService.fetchAllTrades();
     }
