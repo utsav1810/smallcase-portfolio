@@ -18,6 +18,7 @@ Note - Since application is deployed on free-tier resources, it will take about 
 # REST API
 
 All REST APIs are exposed from as a swagger web page - http://smallcase-portfolio-mgt1.herokuapp.com/swagger-ui/index.html
+You can directly use the swagger page to execute APIs or use the curl commands given below.
 
 ## Get summary of all stocks in the portfolio
 
@@ -270,4 +271,3 @@ All REST APIs are exposed from as a swagger web page - http://smallcase-portfoli
             }
         ]
     }
-
