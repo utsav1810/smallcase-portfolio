@@ -271,3 +271,11 @@ You can directly use the swagger page to execute APIs or use the curl commands g
             }
         ]
     }
+
+
+## Things to note
+
+    1. Quantity should be a positive inetger
+    2. Price should be a positive double value
+    3. Ticker should be either of TCS/WIPRO/GODREJIND
+    4. Trade type should be BUY/SELL
