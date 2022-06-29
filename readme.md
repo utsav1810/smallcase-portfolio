@@ -5,11 +5,11 @@ For simplicity, we have assumed there is only one user who can have single portf
 
 ## Tech Stack
 
-Language: `Java` 
+Language: `Java8` 
 
-Framework: `Spring` 
+Framework: `Spring2.7.1` 
 
-Database: `Postgres` 
+Database: `Postgres14.4` 
 
 Deployed on : `Heroku` 
 
