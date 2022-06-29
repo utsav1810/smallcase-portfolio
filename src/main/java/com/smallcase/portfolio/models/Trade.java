@@ -58,7 +58,6 @@ public class Trade {
 
     /* time stamp on which trade was executed */
     @Column(name = "timestamp")
-    @JsonIgnore
     @Temporal(TemporalType.TIMESTAMP)
     private Date timestamp;
 
@@ -164,7 +163,8 @@ public class Trade {
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
-        this.setStatus(Constants.FAILED);
+        if (errorMessage != null && !errorMessage.isEmpty())
+            this.setStatus(Constants.FAILED);
     }
 
     @Override

@@ -58,8 +58,8 @@ public class PortfolioServiceImpl implements PortfolioService{
         trade.setPreviousAvgPrice(0d);
 
         updateStockRecordForTrade(trade);
-        trade.setStatus(Constants.SUCCESS);
         trade.setErrorMessage(null);
+        trade.setStatus(Constants.SUCCESS);
 
         return tradeRepository.save(trade);
     }
