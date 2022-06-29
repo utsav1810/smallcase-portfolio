@@ -150,8 +150,14 @@ public class PortfolioServiceImpl implements PortfolioService{
     @Transactional
     public Trade deleteTrade(String ticker) {
 
+        if(!Utility.isTickerValid(ticker))
+            throw new PortfolioException(HttpStatus.BAD_REQUEST, "This company is not listed. Valid listed companies are: " + Utility.alValidTicker);
+
         //get last executed trade (FAILED/SUCCESS) for given ticker
         Trade lastTradeForTicker = tradeRepository.findTopByTickerOrderByTimestampDesc(ticker);
+        if(lastTradeForTicker == null)
+            throw new PortfolioException(HttpStatus.BAD_REQUEST, "Previous trade not found for: " + ticker);
+
         String status = lastTradeForTicker.getStatus();
 
         //if last trade was a success, then we need to do a rollback on stock table
